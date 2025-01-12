@@ -5,7 +5,7 @@ import math
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, num_heads:int, d_model:int, dropout_ratio: float=0.1):
+    def __init__(self, num_heads:int, d_model:int, dropout: float=0.1):
 
         super(MultiHeadAttention,self).__init__()
 
@@ -27,7 +27,7 @@ class MultiHeadAttention(nn.Module):
         
         self.wo = nn.Linear(d_model,d_model)
 
-        self.dropout = nn.Dropout(dropout_ratio)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, q: torch.Tensor, k: torch.Tensor, 
                 v: torch.Tensor, mask:torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor]:
