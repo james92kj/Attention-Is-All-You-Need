@@ -1,5 +1,5 @@
-from .feedforward import FeedForwardLayer
-from .mha_attention import MultiHeadAttention
+from .feed_forward import FeedForwardLayer
+from .attention import MultiHeadAttention
 from typing import Optional
 import torch.nn as nn 
 import torch 
