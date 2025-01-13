@@ -1,17 +1,17 @@
-from .feed_forward import FeedForwardLayer
+from .feed_forward import FeedForward
 from .attention import MultiHeadAttention
 from typing import Optional
 import torch.nn as nn 
 import torch 
 
 
-class EncoderLayer(nn.Module):
+class EncoderBlock(nn.Module):
 
     def __init__(self, d_model: int, d_ff: int, num_heads: int, dropout: int = 0.1):
-        super(EncoderLayer, self).__init__()
+        super(EncoderBlock, self).__init__()
         
         self.mha_attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads, dropout=dropout)
-        self.feed_forward_layer = FeedForwardLayer(d_model=d_model, d_ff=d_ff, dropout=dropout)
+        self.feed_forward_layer = FeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
 
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
@@ -32,15 +32,15 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
 
         self.encoder_stack = nn.ModuleList([
-            EncoderLayer(d_model=d_model, d_ff=d_ff, num_heads=num_heads, dropout=dropout)
+            EncoderBlock(d_model=d_model, d_ff=d_ff, num_heads=num_heads, dropout=dropout)
             for _ in range(num_layer)
         ])
 
         self.norm = nn.LayerNorm(d_model)
 
-    def forward(self, x):
+    def forward(self, x, mask:Optional[torch.Tensor] = None):
         for layer in self.encoder_stack:
-            x = layer(x)
+            x = layer(x, mask)
         return self.norm(x) 
 
 

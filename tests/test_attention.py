@@ -1,5 +1,5 @@
 import pytest
-from ..src.models.mha_attention import MultiHeadAttention
+from ..src.models.attention import MultiHeadAttention
 import torch 
 
 def test_multi_head_attention_shape():
