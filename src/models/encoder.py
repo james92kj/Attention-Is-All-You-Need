@@ -7,7 +7,7 @@ import torch
 
 class EncoderBlock(nn.Module):
 
-    def __init__(self, d_model: int, d_ff: int, num_heads: int, dropout: int = 0.1):
+    def __init__(self, d_model: int, d_ff: int, num_heads: int, dropout: float = 0.1):
         super(EncoderBlock, self).__init__()
         
         self.mha_attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads, dropout=dropout)

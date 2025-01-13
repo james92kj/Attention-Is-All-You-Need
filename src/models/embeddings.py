@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import math
 
-class InputEmbedding(nn.module):
+class InputEmbedding(nn.Module):
 
     def __init__(self,d_model : int, vocab_size: int):
         super(InputEmbedding, self).__init__()
@@ -20,6 +20,7 @@ class InputEmbedding(nn.module):
 class PositionalEncoding(nn.Module):
 
     def __init__(self, d_model: int, seq_len: int, dropout: float):
+        super(PositionalEncoding,self).__init__()
         pe = torch.zeros(seq_len, d_model)
         # generate position indices 
         position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
@@ -35,5 +36,5 @@ class PositionalEncoding(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-       x =  x + self.pe[:, x.shape[1], :].requires_grad(False)
+       x =  x + self.pe[:, :x.shape[1], :].requires_grad(False)
        return self.dropout(x)

@@ -13,7 +13,8 @@ class Transformer(nn.Module):
                  src_embedding: InputEmbedding, tgt_embedding: InputEmbedding, 
                  src_pos_embedding:PositionalEncoding, tgt_pos_embedding: PositionalEncoding,
                  projection:Projection):
-
+        super(Transformer,self).__init__()
+        
         self.encoder = encoder 
         self.decoder = decoder
         self.src_embedding = src_embedding
