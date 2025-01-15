@@ -1,5 +1,5 @@
-from .attention import MultiHeadAttention
-from .feed_forward import FeedForwardLayer
+from transformer.src.models.attention import MultiHeadAttention
+from transformer.src.models.feed_forward import FeedForward
 import torch.nn as nn 
 import torch 
 
@@ -11,7 +11,7 @@ class DecoderBlock(nn.Module):
 
         self.self_attention_block = MultiHeadAttention(num_heads=num_heads, d_model=d_model, dropout=dropout)
         self.cross_attention_block = MultiHeadAttention(num_heads=num_heads,d_model=d_model, dropout=dropout)
-        self.feed_forward_block = FeedForwardLayer(d_model=d_model,d_ff=d_ff, dropout=dropout)
+        self.feed_forward_block = FeedForward(d_model=d_model,d_ff=d_ff, dropout=dropout)
 
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
@@ -23,11 +23,11 @@ class DecoderBlock(nn.Module):
     def forward(self, x, encoder_output: torch.Tensor, tgt_mask: torch.Tensor, src_mask: torch.Tensor):
         
         # masked multi head attention
-        mask_multi_head_attention = self.self_attention_block(x,x,x,tgt_mask)
+        mask_multi_head_attention,_ = self.self_attention_block(x,x,x,tgt_mask)
         x = self.norm1(x + self.dropout(mask_multi_head_attention))
 
         # multi head attention
-        multi_head_attention = self.cross_attention_block(x, encoder_output, encoder_output, src_mask)
+        multi_head_attention,_ = self.cross_attention_block(x, encoder_output, encoder_output, src_mask)
         x = self.norm2(x + self.dropout(multi_head_attention))
 
         # feed forward layer 

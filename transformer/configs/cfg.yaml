@@ -1,0 +1,20 @@
+dataset:
+  name: opus_books
+  src_lang: en
+  tgt_lang: it 
+
+artifacts: /Users/jameskj/Workspace/paper_implementations/attention_is_all_you_need/transformer/artifacts
+
+model:
+  d_model: 512
+  num_layers: 6
+  num_heads: 8
+  d_ff: 2048
+  dropout: 0.01
+
+train:
+  tokenizer_path: tokenizer_{0}.json
+  per_device_train_batch_size: 64
+  per_device_valid_batch_size: 64
+  lr: 1e-4
+  num_epochs: 2

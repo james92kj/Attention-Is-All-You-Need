@@ -36,5 +36,5 @@ class PositionalEncoding(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-       x =  x + self.pe[:, :x.shape[1], :].requires_grad(False)
+       x =  x + self.pe[:, :x.shape[1], :]
        return self.dropout(x)
