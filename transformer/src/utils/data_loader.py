@@ -1,4 +1,3 @@
-from transformer.src.models import BilingualDataset
 from .data_utils import get_max_len
 from datasets import Dataset, load_dataset
 from tokenizers import Tokenizer
@@ -7,6 +6,7 @@ from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.trainers import WordLevelTrainer
 from torch.utils.data import random_split, DataLoader
 from pathlib import Path
+from torch.utils.data import Subset
 import os
 
 def get_records(dataset:Dataset, lang):
@@ -30,7 +30,8 @@ def build_tokenizer(cfg , ds, lang):
     return tokenizer
 
 
-def get_ds(cfg):
+def get_ds(cfg, quick_test=False):
+    from transformer.src.models import BilingualDataset
     # load the dataset
     ds = load_dataset(cfg.dataset.name, f'{cfg.dataset.src_lang}-{cfg.dataset.tgt_lang}', split='train')
 
@@ -41,6 +42,11 @@ def get_ds(cfg):
     src_seq_len = get_max_len(ds,src_tokenizer,cfg.dataset.src_lang)
     tgt_seq_len = get_max_len(ds,tgt_tokenizer,cfg.dataset.tgt_lang)
 
+    if quick_test:
+        test_size = 100
+        ds = Subset(ds, range(test_size))
+
+
     # split the dataset 
     train_ds_size = int(0.9 * len(ds))
     val_ds_size = len(ds) - train_ds_size
@@ -48,8 +54,8 @@ def get_ds(cfg):
 
     # Plug the BilingualDataset 
     train_ds = BilingualDataset(train_ds,
-                    src_seq_len=src_seq_len,
-                    tgt_seq_len=tgt_seq_len,
+                    src_seq_len=cfg.model.seq_len,
+                    tgt_seq_len=cfg.model.seq_len,
                     src_tokenizer=src_tokenizer,
                     tgt_tokenizer=tgt_tokenizer,
                     src_lang=cfg.dataset.src_lang,
@@ -57,8 +63,8 @@ def get_ds(cfg):
                     )
     
     valid_ds = BilingualDataset(valid_ds,
-                    src_seq_len=src_seq_len,
-                    tgt_seq_len=tgt_seq_len,
+                    src_seq_len=cfg.model.seq_len,
+                    tgt_seq_len=cfg.model.seq_len,
                     src_tokenizer=src_tokenizer,
                     tgt_tokenizer=tgt_tokenizer,
                     src_lang=cfg.dataset.src_lang,

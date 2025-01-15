@@ -11,10 +11,11 @@ model:
   num_heads: 8
   d_ff: 2048
   dropout: 0.01
+  seq_len: 350
 
 train:
   tokenizer_path: tokenizer_{0}.json
-  per_device_train_batch_size: 64
-  per_device_valid_batch_size: 64
+  per_device_train_batch_size: 2
+  per_device_valid_batch_size: 1
   lr: 1e-4
   num_epochs: 2

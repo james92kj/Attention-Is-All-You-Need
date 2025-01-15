@@ -1,17 +1,19 @@
 from transformer import CONF_DIR_PATH, ARTIFACTS_DIR_PATH
-from transformer.src import build_transformer, BilingualDataset
-import torch.optim as optim
-from transformer.src import get_ds
+from transformer.src.models import build_transformer
+from transformer.src.training import run_validation
+from transformer.src.utils import get_ds
 from tqdm.auto import tqdm
+import torch.optim as optim
 import torch
 import hydra
 import os
+
 
 @hydra.main(config_path=CONF_DIR_PATH, config_name='cfg', version_base=None)
 def train(cfg):
     os.makedirs(ARTIFACTS_DIR_PATH,exist_ok=True)
 
-    ds = get_ds(cfg)
+    ds = get_ds(cfg,quick_test=False)
     src_tokenizer, tgt_tokenizer = ds['src_tokenizer'], ds['tgt_tokenizer']
     train_dl, valid_dl = ds['train_dl'],ds['valid_dl']
     src_seq_len, tgt_seq_len = ds['src_seq_len'], ds['tgt_seq_len']
@@ -29,8 +31,8 @@ def train(cfg):
     model = build_transformer(
         src_vocab_size=src_vocab_size,
         tgt_vocab_size=tgt_vocab_size,
-        src_seq_len=src_seq_len,
-        tgt_seq_len=tgt_seq_len,
+        src_seq_len=cfg.model.seq_len,
+        tgt_seq_len=cfg.model.seq_len,
         d_model=cfg.model.d_model,
         N=cfg.model.num_layers,
         h=cfg.model.num_heads,
@@ -55,12 +57,12 @@ def train(cfg):
     
 
     for epoch in range(initial_epoch, end_epoch):
-        
+    
         torch.cuda.empty_cache()
         model.train()
         batch_iterator = tqdm(train_dl, desc=f'Epoch {epoch}')
         
-        for batch in batch_iterator:
+        for step, batch in enumerate(batch_iterator):
             
             label = batch['label'].to(device = device)
             encoder_input = batch['encoder_input'].to(device=device)
@@ -77,16 +79,19 @@ def train(cfg):
                                           )
             
             predicted_vocab = model.project(decoder_output)
-            
-            
-
-            loss = loss_fn(predicted_vocab.continuous().reshape(-1, tgt_vocab_size), label.view(-1))
+            loss = loss_fn(predicted_vocab.contiguous().reshape(-1, tgt_vocab_size), label.view(-1))
             loss.backward()
 
             optimizer.step()
             optimizer.zero_grad() 
 
             global_step += 1
+
+            if step % 300 == 0:
+                run_validation(valid_dl, model,
+                    device, tgt_tokenizer,max_len=cfg.model.seq_len, num_examples=2)
+
+
 
 
     # setup the validation function 

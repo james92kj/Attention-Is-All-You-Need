@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+from transformer.src.utils import casual_mask
 from tokenizers import Tokenizer
 import torch
 
@@ -76,13 +77,9 @@ class BilingualDataset(Dataset):
             'encoder_input': encoder_input,
             'encoder_mask' :  (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int(),
             'decoder_input': decoder_input,
-            'decoder_mask': (decoder_input != self.pad_token).unsqueeze(0).int() & casual_mask(decoder_input),
+            'decoder_mask': (decoder_input != self.pad_token).unsqueeze(0).int() & casual_mask(decoder_input.size()[0]),
             'label': label,
             'src_text': source_sentence,
             'tgt_text': target_sentence
         }
 
-def casual_mask(decoder_input: torch.Tensor):
-    size = decoder_input.size()[0]
-    mat = torch.triu(torch.ones(1,size,size), diagonal=1).int()
-    return mat == 0
